@@ -1,0 +1,18 @@
+ee() { # echo and execute
+	echo "$@"
+	$1 "$2"
+}
+for x in "$*"; do
+	[[ -f $x ]] || continue
+case "$x" in
+	*.tar.gz | *.tgz )ee "tar xvzf" "$x";;
+	*.tar.bzip2 | *.tbz2 ) ee "tar xvjf" "$x";;
+	*.bz2 )ee "bunzip2" "$x";;
+	*.rar )ee "unrar x" "$x" ;;
+	*.gz )ee "gunzip" "$x";;
+	*.tar )ee "tar xvf" "$x" ;;
+	*.zip )ee "unzip" "$x" ;;
+	*.Z )ee "uncompress" "$x" ;;
+	*.7z )ee "7z x" "$x";;
+esac
+done

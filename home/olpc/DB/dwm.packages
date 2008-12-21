@@ -1,0 +1,78 @@
+xserver-xorg-core
+xserver-xorg-input-kbd
+xserver-xorg-input-mouse
+xserver-xorg-input-evdev
+xserver-xorg-video-geode
+xfonts-100dpi
+xfonts-scalable
+xfonts-base
+x11-xserver-utils
+
+#		X stuff
+xauth
+xinit
+xterm
+xutils
+xsel
+##all optional stuff
+aspell-en
+
+#		math
+qalc
+gnuplot
+
+#		time
+ntpdate
+at
+
+#		media
+gstreamer0.10-ffmpeg
+gstreamer0.10-plugins-bad
+gstreamer0.10-plugins-ugly
+feh
+mplayer
+mpd
+mpc
+ncmpc
+scrot
+xpdf
+
+#		utilities
+hal
+lshw
+screen
+pmount
+dosfstools
+tofrodos
+rdesktop
+mc
+aspell
+xbindkeys
+atop
+unzip
+mmv
+diff
+bzip2
+
+#		net stuff
+sshfs
+openssh-server
+nmap
+nc
+rsync
+curl
+xchat
+openssh-client
+links2
+transmission
+wpasupplicant
+#wget "http://download.mozilla.org/?product=firefox-3.0.4&os=linux&lang=en-US"
+
+#		devel stuff
+make
+automake
+build-essential
+cmake
+libX11-dev
+libncurses-dev
+libimlib2-dev

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#sudo echo 1 > /sys/power/wlan-enabled
+sudo echo 0 > /sys/power/wakeup_events/wlan
+sudo echo 0 > /sys/power/wakeup_events/battery_soc
+sudo echo 0 > /sys/power/wakeup_events/battery_state
+sudo echo 0 > /sys/power/wakeup_events/ps2event
+sudo echo 1 > /sys/devices/platform/dcon/sleep
+sudo echo -n "mem" > /sys/power/state
+sudo echo 0 > /sys/devices/platform/dcon/sleep
+#echo 0 > /sys/power/wlan-enabled
+#See LICENSE file for copyright and license details

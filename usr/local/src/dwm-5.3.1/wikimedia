@@ -1,0 +1,14 @@
+/* See LICENSE file for copyright and license details. */
+
+/* appearance */
+static const char font[]            = "-*-profont-*-*-*-*-22-*-*-*-*-*-*-*";
+//determines window border
+static const char normbordercolor[] = "#000000";
+static const char selbordercolor[]  = "#006699";
+//determines 'tab' and 'background' colors
+static const char normbgcolor[]		= "#339966";
+static const char selbgcolor[]		= "#990000";
+//determines text colors for 'tab' and 'background
+static const char normfgcolor[]		= "#000000";
+static const char selfgcolor[]		= "#FFFFFF";
+k
