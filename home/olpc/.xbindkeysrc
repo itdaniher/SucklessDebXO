@@ -1,0 +1,47 @@
+###########################
+# xbindkeys configuration #
+###########################
+
+## Increase backlight
+"xoset u"
+c:76
+
+## Set backlight to max
+"xoset b 15"
+shift + c:76
+
+## Decrease backlight
+"xoset d"
+c:75
+
+## Sets backlight to zero
+"xoset b 0"
+shift + c:75
+
+## Suspends XO
+"sudo ~/bash/xo-suspend"
+c:222
+
+## Toggle screen (Frame)
+"xoset s"
+c:117
+
+## Decrease volume (F11) 
+"amixer -c 0 set Master,0 2dB-" 
+c:95
+
+## Increase volume (F12) 
+"amixer -c 0 set Master,0 2dB+" 
+c:96
+
+## Toggle mute 
+"amixer -c 0 set Master,0 toggle" 
+shift + c:95
+
+## Max volume 
+"amixer -c 0 set Master,0 31" 
+shift + c:96
+
+##################################
+# End of xbindkeys configuration #
+##################################
