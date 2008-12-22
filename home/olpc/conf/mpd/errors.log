@@ -1,0 +1,3 @@
+Dec 17 02:41 : unable to open oss mixer "/dev/mixer"
+Dec 17 02:41 : using software volume
+Dec 17 14:35 : problems opening state file "/var/lib/mpd/state" for writing: Permission denied
