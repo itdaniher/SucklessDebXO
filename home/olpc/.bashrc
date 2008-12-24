@@ -1,3 +1,6 @@
+# If not running interactively, don't do anything
+[ -z "$PS1" ] && return
+
 # don't put duplicate lines in the history. See bash(1) for more options
 export HISTCONTROL=ignoredups
 # ... and ignore same sucessive entries.
@@ -51,8 +54,6 @@ cd
 # |___/|_| |_|\___||_||_|       |_|   \__,_|(_) \___/|_|   \__, |
 #                                                   .bashrc|___/
 #
-# If not running interactively, don't do anything
-[ -z "$PS1" ] && return
 
 
 # convert permissions to octal - http://www.shell-fu.org/lister.php?id=205
