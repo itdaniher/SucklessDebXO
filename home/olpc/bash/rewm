@@ -1,0 +1,11 @@
+#! /bin/bash
+cd /usr/local/src
+for a in *
+do cd $a
+	make install
+	cd /usr/local/src
+done
+cd
+killall -9 dwm
+$HOME/.xsession&
+#See LICENSE file for copyright and license details

@@ -5,7 +5,7 @@ mkfontdir $HOME/conf/.fonts
 xset fp+ $HOME/conf/.fonts
 xset b 
 xbindkeys&
-xmodmap -e "keysym Escape = Delete"
+#xmodmap -e "keysym Escape = Delete"
 if [[ -f ~/conf/first-boot ]]
 then
 	~/conf/first-boot

@@ -14,7 +14,11 @@ xinit
 xterm
 xutils
 xsel
+
+
 ##all optional stuff
+
+
 aspell-en
 
 #		math
@@ -54,6 +58,7 @@ unzip
 mmv
 diff
 bzip2
+stalonetray
 
 #		net stuff
 sshfs
