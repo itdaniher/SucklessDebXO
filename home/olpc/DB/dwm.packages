@@ -86,4 +86,5 @@ cmake
 libX11-dev
 libncurses-dev
 libimlib2-dev
+libgc-dev
 python-elementtree
