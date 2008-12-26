@@ -357,6 +357,7 @@ on debxo-d06ec
 config.status:640: creating Makefile
 config.status:640: creating src/Makefile
 config.status:640: creating src/config.h
+config.status:874: src/config.h is unchanged
 config.status:920: executing depfiles commands
 
 ## ---------------- ##

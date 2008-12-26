@@ -14,5 +14,6 @@ case "$x" in
 	*.zip )ee "unzip" "$x" ;;
 	*.Z )ee "uncompress" "$x" ;;
 	*.7z )ee "7z x" "$x";;
+	*.deb )ee "ar -x" "$x";;
 esac
 done

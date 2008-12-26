@@ -6,7 +6,6 @@ xserver-xorg-video-geode
 xfonts-100dpi
 xfonts-scalable
 xfonts-base
-x11-xserver-utils
 
 #		X stuff
 xauth
@@ -14,6 +13,7 @@ xinit
 xterm
 xutils
 xsel
+x11-xserver-utils
 
 
 ##all optional stuff
@@ -40,7 +40,13 @@ mpd
 mpc
 ncmpc
 scrot
+
+#		documents
 xpdf
+unrtf
+antiword
+aspell
+odt2txt
 
 #		utilities
 hal
@@ -51,14 +57,12 @@ dosfstools
 tofrodos
 rdesktop
 mc
-aspell
 xbindkeys
 atop
 unzip
 mmv
 diff
 bzip2
-stalonetray
 
 #		net stuff
 sshfs
@@ -82,4 +86,4 @@ cmake
 libX11-dev
 libncurses-dev
 libimlib2-dev
-python-elementtre
+python-elementtree

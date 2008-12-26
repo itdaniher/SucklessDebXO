@@ -2,6 +2,10 @@
 cd /usr/local/src
 for a in *
 do cd $a
+	if [ -f configure ]
+	then
+		./configure
+	fi
 	make install
 	cd /usr/local/src
 done
