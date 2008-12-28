@@ -31,6 +31,7 @@ PATH=$PATH:/bin
 PATH=$PATH:/sbin            
 PATH=$PATH:/usr/bin            
 PATH=$PATH:/usr/sbin                        
+PATH=$PATH:/usr/games
 PATH=$PATH:/usr/local/bin           
 PATH=$PATH:$HOME/bash
 PATH=$PATH:$HOME/python

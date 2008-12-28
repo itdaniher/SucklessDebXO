@@ -14,7 +14,7 @@ xterm
 xutils
 xsel
 x11-xserver-utils
-
+xclip
 
 ##all optional stuff
 

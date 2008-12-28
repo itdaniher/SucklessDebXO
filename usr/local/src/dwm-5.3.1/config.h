@@ -58,16 +58,19 @@ static Layout layouts[] = {
 	{ MODKEY|ControlMask|ShiftMask,	KEY,      toggletag,      {.ui = 1 << TAG} },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
-#define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
+#define BASHCMD(cmd) { .v = (const char*[]){ "/bin/bash", "-c", cmd, NULL } }
 
 /* commands */
 static const char *termcmd[] = { "xterm", "-rv", "-fn", font, NULL };
 static const char *menucmd[] = { "dmenu_path", "-b", "-fn", font, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor, "-sf", selfgcolor, NULL };
-
+static const char *dclpcmd[] = { "dclip", "paste", "-fn", font, "-nb", normbgcolor, "-nf", normfgcolor, "-sb", selbgcolor , "-sf", selfgcolor, NULL }; 
 
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
+	{ MODKEY|ShiftMask,					XK_c,		spawn,          BASHCMD("exec dclip copy") }, 
+	{ MODKEY|ShiftMask,					XK_k,		spawn,          BASHCMD("xkill") }, 
+	{ MODKEY|ShiftMask,					XK_v,		spawn,          {.v = dclpcmd } },
 	{ MODKEY,								XK_d,		spawn,			 {.v = menucmd } },
 	{ MODKEY|ShiftMask,					XK_Return,	spawn,		 {.v = termcmd } },
 	{ MODKEY,								XK_F4,	killclient,     {0} },

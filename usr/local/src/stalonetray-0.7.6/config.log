@@ -32,6 +32,7 @@ PATH: /bin
 PATH: /sbin
 PATH: /usr/bin
 PATH: /usr/sbin
+PATH: /usr/games
 PATH: /usr/local/bin
 PATH: /home/olpc/bash
 PATH: /home/olpc/python

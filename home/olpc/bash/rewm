@@ -4,7 +4,10 @@ for a in *
 do cd $a
 	if [ -f configure ]
 	then
-		./configure
+		if [ -nf makefile ]
+		then
+			./configure
+		fi
 	fi
 	make install
 	cd /usr/local/src
