@@ -1,0 +1,17 @@
+#!/bin/sh
+
+if [ -z $1 ]; then
+  echo "Please provide the net device name."
+  echo "Example usage:"
+  echo "$0 eth0"
+  exit 1
+fi
+
+CURRENT_ESSID=$(/sbin/iwconfig $1 | grep ESSID | awk '{print $4}' | sed s/ESSID://)
+
+LINK_QUAL=`/sbin/iwconfig $1 | grep -A5 ESSID | grep Quality | sed -e "s/.*Quality=//" | sed -e "s/\/.*$//"`
+
+CUR_IP=`/sbin/ifconfig $1 | grep "inet addr" | sed -e "s/.*inet addr://" | sed -e "s/Bcast.*//"`
+
+echo $1: $CURRENT_ESSID $LINK_QUAL%"  " IP: $CUR_IP
+
