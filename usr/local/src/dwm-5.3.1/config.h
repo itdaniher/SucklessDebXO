@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
 /* appearance */
-static const char font[]            = "-*-profont-*-*-*-*-17-*-*-*-*-*-*-*";
+static const char font[]            = "-*-profont-*-*-*-*-22-*-*-*-*-*-*-*";
 //determines window border
 static const char normbordercolor[] = "#000000";
 static const char selbordercolor[]  = "#006699";
@@ -21,7 +21,7 @@ static Bool usegrab                 = False;    /* True means grabbing the X ser
 
 
 /* tagging */
-static const char tags[][MAXTAGLEN] = { "rnd", "doc", "irc", "www", "art", "pdf" };
+static const char tags[][MAXTAGLEN] = { "rnd", "doc", "rnd", "www", "art" };
 static unsigned int tagset[] = {1, 1}; 
 
 static Rule rules[] = {
@@ -33,7 +33,8 @@ static Rule rules[] = {
 		{ "frame",		NULL,			NULL,			1 << 0,		True },
 		{ "Xchat",		NULL,			NULL,			1 << 2,		False },
 		{ "OpenOffice.org",NULL,	NULL,			1 << 1,		False },
-		{ "Xpdf",		NULL,			NULL,			1 << 5,		False },
+		{ "Xpdf",		NULL,			NULL,			1 << 1,		False },
+		{ "feh",			NULL, 		NULL,			NULL, 		True },
 };
 
 /* layout(s) */

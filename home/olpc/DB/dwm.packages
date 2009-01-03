@@ -71,10 +71,10 @@ nmap
 nc
 rsync
 curl
-xchat
+irssi
 openssh-client
-links2
-transmission
+w3m
+deluge
 wpasupplicant
 #wget "http://download.mozilla.org/?product=firefox-3.0.4&os=linux&lang=en-US"
 

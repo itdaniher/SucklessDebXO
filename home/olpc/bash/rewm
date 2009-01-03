@@ -4,8 +4,10 @@ for a in *
 do cd $a
 	if [ -f configure ]
 	then
-		if [ -nf makefile ]
+		if [ -f *akefile ]
 		then
+			echo "You already have a makefile luser!"
+		else
 			./configure
 		fi
 	fi
