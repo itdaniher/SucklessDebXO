@@ -1,0 +1,2 @@
+gst-launch-0.10 v4l2src ! ffmpegcolorspace ! ximagesink
+#See LICENSE file for copyright and license details

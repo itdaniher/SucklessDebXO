@@ -18,3 +18,4 @@ acceptable arguments are:
 '
 fi
 #hash = md5(filename); url = "http://upload.wikimedia.org/wikipedia/commons/' + hash[0] + '/' + hash[0] + hash[1] + '/' + filename"
+#See LICENSE file for copyright and license details

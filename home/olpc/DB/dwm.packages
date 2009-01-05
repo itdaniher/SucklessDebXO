@@ -14,12 +14,9 @@ xterm
 xutils
 xsel
 x11-xserver-utils
-xclip
 
 ##all optional stuff
 
-
-aspell-en
 
 #		math
 qalc
@@ -47,6 +44,8 @@ unrtf
 antiword
 aspell
 odt2txt
+aspell-en
+html2text
 
 #		utilities
 hal
@@ -74,6 +73,7 @@ curl
 irssi
 openssh-client
 w3m
+w3m-img
 deluge
 wpasupplicant
 #wget "http://download.mozilla.org/?product=firefox-3.0.4&os=linux&lang=en-US"

@@ -35,6 +35,7 @@ static Rule rules[] = {
 		{ "OpenOffice.org",NULL,	NULL,			1 << 1,		False },
 		{ "Xpdf",		NULL,			NULL,			1 << 1,		False },
 		{ "feh",			NULL, 		NULL,			NULL, 		True },
+		{ "stalonetray",NULL, 		NULL,			~0, 		True },
 };
 
 /* layout(s) */

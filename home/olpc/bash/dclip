@@ -26,3 +26,4 @@ echo -n "$sel_clip" | xsel -p -i
 echo -n "$sel_clip" | xsel -b -i
 
 exit 0
+#See LICENSE file for copyright and license details

@@ -1,1 +1,2 @@
 find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
+#See LICENSE file for copyright and license details

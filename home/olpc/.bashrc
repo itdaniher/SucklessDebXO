@@ -1,6 +1,7 @@
 # If not running interactively, don't do anything
+TERM=xterm
 [ -z "$PS1" ] && return
-
+DISPLAY=:0.0
 # don't put duplicate lines in the history. See bash(1) for more options
 export HISTCONTROL=ignoredups
 # ... and ignore same sucessive entries.

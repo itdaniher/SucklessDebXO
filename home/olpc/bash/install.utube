@@ -16,4 +16,4 @@ acceptable arguments are:
 --all-install	installs the video downloader and mplayer
 --grab (ID)	downloads the video to the current directory
 '
-fi
+fi#See LICENSE file for copyright and license details

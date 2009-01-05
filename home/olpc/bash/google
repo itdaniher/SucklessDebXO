@@ -1,0 +1,3 @@
+s=$*
+w3m http://www.google.com/search?q=${s// /+}
+#See LICENSE file for copyright and license details

@@ -1,3 +1,8 @@
 Dec 17 02:41 : unable to open oss mixer "/dev/mixer"
 Dec 17 02:41 : using software volume
 Dec 17 14:35 : problems opening state file "/var/lib/mpd/state" for writing: Permission denied
+ACK [55@0] player not currently playing
+ACK [55@0] player not currently playing
+Jan 05 10:41 : Input does not appear to be a mp3 bit stream.
+Jan 05 13:02 : Input does not appear to be a mp3 bit stream.
+Jan 05 13:57 : Error opening alsa device "default": Device or resource busy

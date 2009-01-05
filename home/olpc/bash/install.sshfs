@@ -16,3 +16,4 @@ sudo chmod 555 /dev/fuse
 #sshfs remote-system-name:/remote-folder /media/mount-name 
 #6) Unmount the filesystem 
 #fusermount -u /media/mount-name
+#See LICENSE file for copyright and license details

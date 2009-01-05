@@ -17,3 +17,4 @@ case "$x" in
 	*.deb )ee "ar -x" "$x";;
 esac
 done
+#See LICENSE file for copyright and license details

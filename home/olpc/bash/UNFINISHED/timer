@@ -1,0 +1,1 @@
+i=0; while sleep 1; do ((i=i+1)); echo -ne "$i\r"; done

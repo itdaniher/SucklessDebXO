@@ -1,5 +1,5 @@
 #if [ "x`pgrep xchat`" = "x" ]; then xchat; fi&
-if [ "x`pgrep screen`" = "x" ]; then screen -tqA mus -d -m; fi&
+if [ $(pgrep screen) = "" ]; then screen -tqA mus -d -m; fi&
 bgs $HOME/conf/bg.jpg
 mkfontdir $HOME/conf/.fonts
 xset fp+ $HOME/conf/.fonts
