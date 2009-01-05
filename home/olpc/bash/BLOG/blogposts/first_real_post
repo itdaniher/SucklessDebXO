@@ -1,5 +1,0 @@
-BLOG_KEYWORDS: internet gsoc
-BLOG_TITLE: Here we have the beginnings of a blog.
-
-<p>Well, I got accepted to <a href="http://code.google.com/soc/2008/">GSoC</a>, which is pretty damn exciting.  You can see my abstract <a href="http://code.google.com/soc/2008/osuosl/appinfo.html?csaid=BC30B2B9A0E1DDBA">here</a>.  It took me a while to bandy up the nerve to apply, but I did, and then I got picked.  It's kind of mindblowing to me.  Anyway, I'll be working with my mentor Jeff Sheltren at the <a href="http://osuosl.org">Oregon State University Open Source Lab</a>, and I'm severely stoked about it.</p>
-<p>I was asked to keep notes and things on my progress, so I wrote a ~100-line bash script to handle this blog.  Comments will be enabled as soon as I figure out how to do them in three lines without subjecting my machine to bash injection attacks.  If you notice anything going wrong here, feel free to let me know.  Contact info and other stuff will be posted here on a static page.   Any such functional enhancements to this site are going to have to wait until after finals.<p>

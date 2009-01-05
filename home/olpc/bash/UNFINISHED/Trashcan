@@ -1,8 +1,0 @@
-TRSH=/tmp/.Trash-$USER
-if [ -d $TRSH ]
-then
-	mv "$1" $TRSH
-else
-	mkdir $TRSH
-	$0 "$1" 
-fi
