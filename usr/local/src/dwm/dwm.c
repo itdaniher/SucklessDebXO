@@ -62,6 +62,7 @@ enum { NetSupported, NetWMName, NetLast };              /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMLast };        /* default atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast };             /* clicks */
+enum { Normal, Floating, NoFocus=2 };                   /* Client flags for Rules */
 
 typedef union {
 	int i;
@@ -86,7 +87,7 @@ struct Client {
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
 	unsigned int tags;
-	Bool isfixed, isfloating, isurgent;
+	Bool isfixed, isfloating, isurgent, nofocus;
 	Client *next;
 	Client *snext;
 	Window win;
@@ -124,7 +125,7 @@ typedef struct {
 	const char *instance;
 	const char *title;
 	unsigned int tags;
-	Bool isfloating;
+	unsigned int flags;
 } Rule;
 
 /* function declarations */
@@ -165,7 +166,7 @@ static void killclient(const Arg *arg);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
-static void monocle(void);
+//static void monocle(void);
 static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
 static void propertynotify(XEvent *e);
@@ -176,15 +177,15 @@ static void restack(void);
 static void run(void);
 static void scan(void);
 static void setclientstate(Client *c, long state);
-static void setlayout(const Arg *arg);
-static void setmfact(const Arg *arg);
+//static void setlayout(const Arg *arg);
+//static void setmfact(const Arg *arg);
 static void setup(void);
 static void showhide(Client *c, unsigned int ntiled);
-static void sigchld(int signal);
-static void spawn(const Arg *arg);
+//static void sigchld(int signal);
+//static void spawn(const Arg *arg);
 static void tag(const Arg *arg);
 static int textnw(const char *text, unsigned int len);
-static void tile(void);
+//static void tile(void);
 static void togglebar(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void toggletag(const Arg *arg);
@@ -268,8 +269,10 @@ applyrules(Client *c) {
 			if((!r->title || strstr(c->name, r->title))
 			&& (!r->class || (ch.res_class && strstr(ch.res_class, r->class)))
 			&& (!r->instance || (ch.res_name && strstr(ch.res_name, r->instance)))) {
-				c->isfloating = r->isfloating;
-				c->tags |= r->tags & TAGMASK ? r->tags & TAGMASK : tagset[seltags]; 
+				c->isfloating = (r->flags&Floating)!=0;
+				c->nofocus = (r->flags&NoFocus)!=0;
+				c->tags |= r->tags & TAGMASK;
+//				c->tags |= r->tags & TAGMASK ? r->tags & TAGMASK : tagset[seltags]; 
 			}
 		}
 		if(ch.res_class)
@@ -506,7 +509,8 @@ drawbar(void) {
 	Client *c;
 
 	for(c = clients; c; c = c->next) {
-		occ |= c->tags;
+		if(c->tags!=TAGMASK)
+			occ |= c->tags;
 		if(c->isurgent)
 			urg |= c->tags;
 	}
@@ -516,7 +520,7 @@ drawbar(void) {
 		dc.w = TEXTW(tags[i]);
 		col = tagset[seltags] & 1 << i ? dc.sel : dc.norm;
 		drawtext(tags[i], col, urg & 1 << i);
-		drawsquare(sel && sel->tags & 1 << i, occ & 1 << i, urg & 1 << i, col);
+		drawsquare(sel && tagset[seltags] & sel->tags & 1 << i, occ & 1 << i, urg & 1 << i, col);
 		dc.x += dc.w;
 	}
 	if(blw > 0) {
@@ -618,6 +622,7 @@ expose(XEvent *e) {
 
 void
 focus(Client *c) {
+	Client *inc=c;
 	if(!c || !ISVISIBLE(c))
 		for(c = stack; c && !ISVISIBLE(c); c = c->snext);
 	if(sel && sel != c) {
@@ -629,6 +634,9 @@ focus(Client *c) {
 			clearurgent(c);
 		detachstack(c);
 		attachstack(c);
+	}
+	while( !inc && c && c->nofocus ) c=c->next;
+	if(c) {
 		grabbuttons(c, True);
 		XSetWindowBorder(dpy, c->win, dc.sel[ColBorder]);
 		XSetInputFocus(dpy, c->win, RevertToPointerRoot, CurrentTime);
@@ -654,17 +662,17 @@ focusstack(const Arg *arg) {
 	if(!sel)
 		return;
 	if (arg->i > 0) {
-		for(c = sel->next; c && !ISVISIBLE(c); c = c->next);
+		for(c = sel->next; c && (!ISVISIBLE(c) || c->nofocus); c = c->next);
 		if(!c)
-			for(c = clients; c && !ISVISIBLE(c); c = c->next);
+			for(c = clients; c && (!ISVISIBLE(c) || c->nofocus); c = c->next);
 	}
 	else {
 		for(i = clients; i != sel; i = i->next)
-			if(ISVISIBLE(i))
+			if(ISVISIBLE(i) && !i->nofocus)
 				c = i;
 		if(!c)
 			for(; i; i = i->next)
-				if(ISVISIBLE(i))
+				if(ISVISIBLE(i) && !i->nofocus)
 					c = i;
 	}
 	if(c) {
@@ -937,7 +945,7 @@ maprequest(XEvent *e) {
 		manage(ev->window, &wa);
 }
 
-void
+/*void
 monocle(void) {
 	unsigned int n;
 	Client *c;
@@ -947,7 +955,7 @@ monocle(void) {
 		adjustborder(c, n == 1 ? 0 : borderpx);
 		resize(c, wx, wy, ww - 2 * c->bw, wh - 2 * c->bw, resizehints);
 	}
-}
+}*/
 
 void
 movemouse(const Arg *arg) {
@@ -1243,7 +1251,7 @@ setclientstate(Client *c, long state) {
 			PropModeReplace, (unsigned char *)data, 2);
 }
 
-void
+/*void
 setlayout(const Arg *arg) {
 	if(!arg || !arg->v || arg->v != lt[sellt])
 		sellt ^= 1;
@@ -1253,10 +1261,10 @@ setlayout(const Arg *arg) {
 		arrange();
 	else
 		drawbar();
-}
+}*/
 
 /* arg > 1.0 will set mfact absolutly */
-void
+/*void
 setmfact(const Arg *arg) {
 	float f;
 
@@ -1267,7 +1275,7 @@ setmfact(const Arg *arg) {
 		return;
 	mfact = f;
 	arrange();
-}
+}*/
 
 void
 setup(void) {
@@ -1363,7 +1371,7 @@ showhide(Client *c, unsigned int ntiled) {
 }
 
 
-void
+/*void
 sigchld(int signal) {
 	while(0 < waitpid(-1, NULL, WNOHANG));
 }
@@ -1381,6 +1389,7 @@ spawn(const Arg *arg) {
 		exit(0);
 	}
 }
+*/
 
 void
 tag(const Arg *arg) {
@@ -1399,42 +1408,6 @@ textnw(const char *text, unsigned int len) {
 		return r.width;
 	}
 	return XTextWidth(dc.font.xfont, text, len);
-}
-
-void
-tile(void) {
-	int x, y, h, w, mw;
-	unsigned int i, n;
-	Client *c;
-
-	for(n = 0, c = nexttiled(clients); c; c = nexttiled(c->next), n++);
-	if(n == 0)
-		return;
-
-	/* master */
-	c = nexttiled(clients);
-	mw = mfact * ww;
-	adjustborder(c, n == 1 ? 0 : borderpx);
-	resize(c, wx, wy, (n == 1 ? ww : mw) - 2 * c->bw, wh - 2 * c->bw, resizehints);
-
-	if(--n == 0)
-		return;
-
-	/* tile stack */
-	x = (wx + mw > c->x + c->w) ? c->x + c->w + 2 * c->bw : wx + mw;
-	y = wy;
-	w = (wx + mw > c->x + c->w) ? wx + ww - x : ww - mw;
-	h = wh / n;
-	if(h < bh)
-		h = wh;
-
-	for(i = 0, c = nexttiled(c->next); c; c = nexttiled(c->next), i++) {
-		adjustborder(c, borderpx);
-		resize(c, x, y, w - 2 * c->bw, /* remainder */ ((i + 1 == n)
-		       ? wy + wh - y - 2 * c->bw : h - 2 * c->bw), resizehints);
-		if(h != wh)
-			y = c->y + HEIGHT(c);
-	}
 }
 
 void
@@ -1707,10 +1680,34 @@ zoom(const Arg *arg) {
 
 int
 main(int argc, char *argv[]) {
-	if(argc == 2 && !strcmp("-v", argv[1]))
-		die("dwm-"VERSION", © 2006-2009 dwm engineers, see LICENSE for details\n");
-	else if(argc != 1)
-		die("usage: dwm [-v]\n");
+	unsigned int i;
+   for(i = 1; i < argc; i++)
+      if(!strcmp(argv[i], "-fn")) {
+         if(++i < argc) font = argv[i];
+      }
+      else if(!strcmp(argv[i], "-nb")) {
+         if(++i < argc) normbgcolor = argv[i];
+      }
+      else if(!strcmp(argv[i], "-nf")) {
+         if(++i < argc) normfgcolor = argv[i];
+      }
+      else if(!strcmp(argv[i], "-sb")) {
+         if(++i < argc) selbgcolor = argv[i];
+      }
+      else if(!strcmp(argv[i], "-sf")) {
+         if(++i < argc) selfgcolor = argv[i];
+      }
+      else if(!strcmp(argv[i], "-nd")) {
+         if(++i < argc) normbordercolor = argv[i];
+      }
+      else if(!strcmp(argv[i], "-sd")) {
+         if(++i < argc) selbordercolor = argv[i];
+      }
+                else if(!strcmp(argv[i], "-v"))
+         die("dwm-"VERSION", © 2006-2008 dwm engineers, see LICENSE for details\n");
+      else
+         die("usage: dwm [-fn <font>] [-nb <color>] [-nf <color>]\n"
+                "[-v] [-sb <color>] [-sf <color>] [-nd <color>] [-sd <color>]\n");
 
 	if(!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fprintf(stderr, "warning: no locale support\n");
