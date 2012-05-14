@@ -1,3 +1,4 @@
+#	X stuff
 xserver-xorg-core
 xserver-xorg-input-kbd
 xserver-xorg-input-mouse
@@ -7,7 +8,6 @@ xfonts-100dpi
 xfonts-scalable
 xfonts-base
 
-#		X stuff
 xauth
 xinit
 xterm
@@ -18,16 +18,16 @@ x11-xserver-utils
 ##all optional stuff
 
 
-#		math
+#	math
 qalc
 gnuplot
 units
 
-#		time
+#	time
 ntpdate
 at
 
-#		media
+#	media
 gstreamer0.10-ffmpeg
 gstreamer0.10-plugins-bad
 gstreamer0.10-plugins-ugly
@@ -38,33 +38,29 @@ mpc
 ncmpc
 scrot
 
-#		documents
-xpdf
+#	documents
 unrtf
 antiword
-aspell
 odt2txt
-aspell-en
 html2text
+aspell-en
 vim
 
-#		utilities
+#	utilities
 hal
 lshw
 tmux
 pmount
 dosfstools
 tofrodos
-rdesktop
 mc
-xbindkeys
 atop
 unzip
 mmv
 diff
 bzip2
 
-#		net stuff
+#	net stuff
 sshfs
 openssh-server
 nmap
@@ -75,15 +71,20 @@ irssi
 openssh-client
 wpasupplicant
 rtorrent
+git
+subversion
 
-#		devel stuff
+#	devel stuff
 make
 automake
 build-essential
 cmake
+
+#	development headers
 libX11-dev
 libncurses-dev
 libimlib2-dev
 libgc-dev
 libxpm-dev
 libxft-dev
+libssl-dev
