@@ -51,7 +51,7 @@ vim
 #		utilities
 hal
 lshw
-screen
+tmux
 pmount
 dosfstools
 tofrodos
