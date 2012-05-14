@@ -34,7 +34,7 @@ case $1 in
 #backlight up one
 	q)	cat $BLFILE;;
 	p)	cat $PWFILE;;
-	h) 
+	*) 
 		echo "usage:
 	xoset <choice> <args>
 b		sets the backlight to a value from 0-15

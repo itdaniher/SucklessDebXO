@@ -1,5 +1,7 @@
-$HOME/conf/xautorun
-while true
-do
-	echo `date +%a\ %m.%d.%y\ %H:%M:%S` :: $(battery-status)
-done | dwm || exit
+mkfontdir /home/it/.fonts
+xset +fp /home/it/.fonts
+bgs $HOME/.config/bg&
+screen -AqdmU&
+launcher torsmo&
+speckeysd ~/.config/suckless/keys&
+launcher dwm

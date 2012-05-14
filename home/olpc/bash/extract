@@ -1,20 +1,16 @@
-ee() { # echo and execute
-	echo "$@"
-	$1 "$2"
-}
 for x in "$*"; do
 	[[ -f $x ]] || continue
 case "$x" in
-	*.tar.gz | *.tgz )ee "tar xvzf" "$x";;
-	*.tar.bzip2 | *.tbz2 ) ee "tar xvjf" "$x";;
-	*.bz2 )ee "bunzip2" "$x";;
-	*.rar )ee "unrar x" "$x" ;;
-	*.gz )ee "gunzip" "$x";;
-	*.tar )ee "tar xvf" "$x" ;;
-	*.zip )ee "unzip" "$x" ;;
-	*.Z )ee "uncompress" "$x" ;;
-	*.7z )ee "7z x" "$x";;
-	*.deb )ee "ar -x" "$x";;
+	*.tar.gz | *.tgz ) tar xvzf "$x";;
+	*.tar.bz2 | *.tbz2 )  tar xvjf "$x";;
+	*.bz2 ) "bunzip2" "$x";;
+	*.rar ) unrar x "$x" ;;
+	*.gz ) gunzip "$x";;
+	*.tar ) tar xvf "$x" ;;
+	*.zip ) unzip "$x" ;;
+	*.Z ) uncompress "$x" ;;
+	*.7z ) 7z x "$x";;
+	*.deb ) ar p $x data.tar.gz | tar xvzf -;;
 esac
 done
 #See LICENSE file for copyright and license details

@@ -1,0 +1,43 @@
+alignment top_left
+background yes
+border_width 1
+default_color white
+default_outline_color white
+default_shade_color white
+double_buffer yes
+draw_borders no
+draw_outline no
+draw_shades no
+gap_y 22 
+minimum_size 330 10
+no_buffers yes
+stippled_borders 2
+update_interval 2
+uppercase no
+
+TEXT
+
+$nodename
+Uptime: $uptime  
+${time %a %m.%d.%y %H:%M}
+
+NET:
+Down: ${downspeedf eth0} k/s
+Up: ${upspeedf eth0} k/s
+${exec ~/bash/wifi status}
+
+Load: $loadavg
+CPU: ${cpu}% ${cpubar 5,85}
+
+RAM: $mem/$memmax
+
+Disk Status:
+${execi 20 df -h}
+
+MPD Status:
+${execi 20 mpc}
+
+Battery Status:
+${execi 100 battery-status}
+
+Processes: ${processes}

@@ -1,0 +1,10 @@
+fn=-misc-fixed-medium-r-normal--20-200-75-75-c-100-iso10646-*
+#window border colors, normal + selected
+nd=#000000
+sd=#006699
+#tab colors, normal + selected
+nb=#FFFFFF
+sb=#000000
+#font colors, normal + selected
+nf=#000000
+sf=#FFFFFF

@@ -1,0 +1,14 @@
+# Key names come from <X11/keysymdef.h> (remove the XK_ prefix).
+# Syntax:
+#Key1-Key2-Key3	bash command
+
+Super-d	dmenu_path
+Super-w	launcher wifi
+Super-Shift-k	xkill
+Super-Shift-v	dclip paste
+Super-Shift-c	dclip copy
+Super-Shift-s	dclip sprunge
+Super-Shift-t	dclip tr.im
+Super-Shift-Return	launcher uxterm
+Super-u	utf_select
+Print	scrot

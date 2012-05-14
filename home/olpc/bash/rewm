@@ -6,15 +6,14 @@ do cd $a
 	then
 		if [ -f *akefile ]
 		then
-			echo "You already have a makefile luser!"
+			echo "You already have a makefile for $a!"
 		else
 			./configure
 		fi
 	fi
-	make install
+	make install > /dev/null
+	echo installing $a
 	cd /usr/local/src
 done
 cd
-killall -9 dwm
-$HOME/.xsession&
 #See LICENSE file for copyright and license details
