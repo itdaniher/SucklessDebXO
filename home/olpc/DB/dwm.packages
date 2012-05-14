@@ -46,6 +46,7 @@ aspell
 odt2txt
 aspell-en
 html2text
+vim
 
 #		utilities
 hal
