@@ -1,0 +1,308 @@
+.\" This program and its documentation are Public Domain.
+.\" Steve Summit, scs@eskimo.com
+.\" See http://www.eskimo.com/~scs/src/#extract for possible updates.
+.TH "EXTRACT" 1
+.SH "NAME"
+.br
+.ft R
+extract \- extract byte ranges from file or stream
+.SH "SYNOPSIS"
+.br
+.ft R
+\fBextract\fR
+[
+\fB\-nv\fR
+]
+ranges
+[ files ]
+.br
+\fBextract\fR
+[
+\fB\-nv\fR
+]
+\fB\-f\fR
+frombyte
+\fB\-t\fR
+tobyte
+[ files ]
+.SH "DESCRIPTION"
+.br
+.ft R
+.PP
+\fIextract\fR
+extracts selected ranges of bytes,
+from standard input or named files.
+Byte numbers are 1-based
+(but see the \fB\-s\fR option below).
+.br
+.PP
+The byte ranges to be extracted may be specified in several ways.
+First (though this is somewhat of a special case),
+a single numeric argument on the command line
+requests that a simple initial prefix of the input,
+\fIn\fR bytes long, be extracted.
+For example,
+.sp
+.nf
+.ft C
+	extract 10 inputfile
+.ft R
+.fi
+.sp
+would extract the first 10 bytes
+of the file named \fIinputfile\fR.
+.br
+.PP
+More generally,
+byte ranges
+may be selected
+using the notation
+\fIm\fR\-\fIn\fR.
+Multiple ranges may be separated by commas,
+or entered as separate arguments.
+For example,
+the invocation
+.sp
+.nf
+.ft C
+	extract 10\-20 inputfile
+.ft R
+.fi
+.sp
+would extract bytes 10 through 20 of
+\fIinputfile\fR.
+.br
+.PP
+In the
+\fIm\fR\-\fIn\fR
+notation,
+either
+\fIm\fR
+or
+\fIn\fR
+(but not both) may be omitted.
+The notation
+\fB\-\fR\fIn\fR
+means from the beginning of the file up to byte
+\fIn\fR.
+The notation
+\fIm\fR\fB\-\fR
+means from byte
+\fIm\fR
+to the end of the file.
+.br
+.PP
+Because multiple byte numbers may be entered as separate arguments,
+there is an ambiguity
+if an input filename has a name which looks like a number.
+To resolve the ambiguity, use an alternative pathname for the file
+which does not begin with a digit.
+The simplest way to do so is to precede the numeric filename with "./".
+.br
+.SH "OPTIONS"
+.br
+.ft R
+.IP "\fB\-v\fR"
+Invert;
+extract all bytes
+\fInot\fR
+selected.
+.br
+.IP "\fB\-version\fR"
+Print program's version number.
+.br
+.IP "\fB\-?\fR,\fB\-h\fR"
+Print a brief help message.
+.br
+.SH "ALTERNATIVE BYTE NUMBER SELECTION OPTIONS"
+.br
+.ft R
+.PP
+It is also possible to specify byte numbers or ranges
+using explicit option flags:
+.IP "\fB\-f\fR \fIn\fR"
+("from")
+Start extracting at byte
+\fIn\fR.
+.br
+.IP "\fB\-s\fR \fIn\fR"
+("seek")
+Start extracting at
+<a href="/~scs/cgi-bin/manredir.cgi?name=lseek&sec=2">\fIlseek(2)\fR</a> offset \fIn\fR,
+that is, just after byte number \fIn\fR.
+(\fB\-s\fR\ \fIn\fR
+is therefore equivalent to
+\fB\-f\fR\ \fIn\fR+1.)
+.br
+.IP "\fB\-t\fR \fIn\fR"
+("to")
+Stop extracting at byte
+\fIn\fR.
+.br
+.IP "\fB\-e\fR \fIn\fR"
+("end")
+Stop extracting just before byte
+\fIn\fR,
+that is, at byte
+\fIn\fR\-1.
+.br
+.IP "\fB\-p\fR \fIn\fR"
+("plus")
+Extract
+\fIn\fR
+bytes past the last-specified start byte.
+That is,
+.sp
+.nf
+.ft C
+	\-f m \-p n
+.ft R
+.fi
+.sp
+is equivalent to
+.sp
+.nf
+.ft C
+	\-f m \-t m+n\-1
+.ft R
+.fi
+.sp
+(or to \fC\-f m \-e m+n\fR ).
+.br
+.br
+.PP
+Any number of
+\fB\-f\fR,
+\fB\-s\fR,
+\fB\-t\fR,
+\fB\-e\fR,
+and
+\fB\-p\fR
+options may appear.
+When these options are used,
+lone numbers
+on the command line
+are
+\fInot\fR
+interpreted as byte numbers or ranges,
+and are therefore unambiguously usable as filenames.
+.br
+.PP
+The
+\fB\-f\fR,
+\fB\-s\fR,
+\fB\-t\fR,
+\fB\-e\fR,
+and
+\fB\-p\fR
+options are intended for use in shell scripts,
+when a complicated set of byte number ranges is being built up on-the-fly,
+and when constructing a single string
+containing many dashes and commas
+would be even more cumbersome.
+.br
+.SH "MORE DESCRIPTION"
+.br
+.ft R
+.PP
+When
+\fIextract\fR
+is invoked with multiple input filenames,
+the specified bytes are selected from all files.
+For example,
+.sp
+.nf
+.ft C
+	extract 5\-10 a b c
+.ft R
+.fi
+.sp
+would extract bytes 5 through 10 of file
+\fIa\fR,
+followed by bytes 5 through 10 of file
+\fIb\fR,
+followed by bytes 5 through 10 of file
+\fIc\fR.
+To select bytes from the concatenation of many input files,
+use
+<a href="/~scs/cgi-bin/manredir.cgi?name=cat&sec=1">\fIcat(1)\fR</a>
+and a pipeline:
+.sp
+.nf
+.ft C
+	cat a b c | extract 5\-10
+.ft R
+.fi
+.sp
+.br
+.PP
+The
+\fIm\fR\-\fIn\fR
+byte-selection syntax also supports "relative" (counted) range increments,
+analogous to the
+\fB\-p\fR
+option.
+The notation
+\fIm\fR\fB:\fR\fIn\fR
+is equivalent to
+\fIm\fR\fB\-\fR\fIm\fR+\fIn\fR\-1.
+For example,
+the invocation
+.sp
+.nf
+.ft C
+	extract 5:10 inputfile
+.ft R
+.fi
+.sp
+would extract 10 bytes beginning with byte 5
+(that is, bytes 5 through 14)
+.br
+.PP
+\fIextract\fR can extract individual bytes,
+although this is infrequently useful.
+For example,
+.sp
+.nf
+.ft C
+	extract 1,5,10\-20
+.ft R
+.fi
+.sp
+would extract bytes 1, 5, and 10 through 20.
+There is another ambiguity, however,
+since a single number \fIn\fR
+(as discussed above)
+selects bytes 1\-\fIn\fR.
+To select byte \fIn\fR and only byte \fIn\fR,
+use the degenerate range
+\fIn\fR\fB\-\fR\fIn\fR.
+.br
+.SH "HISTORY"
+.br
+.ft R
+.PP
+\fIextract\fR is closely related to the
+<a href="line.man.html">\fIline\fR</a> program,
+and in fact shares its source code.
+.br
+.PP
+This documentation corresponds to version 2.3 of the program.
+.br
+.PP
+See
+\fChttp://www.eskimo.com/~scs/src/#extract\fR
+for possible updates.
+.br
+.SH "SEE ALSO"
+.br
+.ft R
+<a href="line.man.html">\fIline\fR</a>,
+<a href="/~scs/cgi-bin/manredir.cgi?name=lseek&sec=2">\fIlseek(2)\fR</a>
+.SH "AUTHOR"
+.br
+.ft R
+.PP
+Steve Summit,
+\fCscs@eskimo.com\fR
+.br

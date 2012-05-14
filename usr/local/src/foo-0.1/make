@@ -1,0 +1,4 @@
+target=foo
+rm -f $target
+gcc -m32 -o $target -g -O2 -fno-strict-aliasing $target.c -lX11 
+cp $target /usr/local/bin

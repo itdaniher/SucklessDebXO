@@ -8,6 +8,7 @@
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
+#include <wordexp.h>
 #include <X11/keysym.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -59,6 +60,7 @@ static Bool grabkeyboard(void);
 static void initfont(const char *fontstr);
 static void kpress(XKeyEvent * e);
 static void match(char *pattern);
+static void matchfile(char *filestart);
 static void readstdin(void);
 static void run(void);
 static void setup(Bool topbar);
@@ -470,6 +472,10 @@ kpress(XKeyEvent * e) {
 		}
 		break;
 	case XK_Tab:
+		if( strchr(text, ' ')!=NULL ) {
+			matchfile( strchr(text, ' ')+1 );
+			break;
+		}
 		if(!sel)
 			return;
 		strncpy(text, sel->text, sizeof text);
@@ -518,6 +524,35 @@ match(char *pattern) {
 	}
 	curr = prev = next = sel = item;
 	calcoffsets();
+}
+
+void
+matchfile(char *filestart) {
+	wordexp_t exp;
+	int i, j, k, p=strlen(filestart);
+	filestart[ p+1 ] = 0;
+	filestart[ p ] = '*';
+
+	wordexp(filestart, &exp, 0);
+	if( exp.we_wordc > 0 ) {
+		for(j=0,i=0; exp.we_wordv[0][i]!=0; i++,j++) {
+			if( exp.we_wordv[0][i]==' ' ) filestart[j++]='\\';
+			filestart[j]=exp.we_wordv[0][i];
+		}
+		filestart[j]=0;
+
+		for(k=1; k<exp.we_wordc; k++)  // comment this block for first-completion
+			for(j=0, i=0; exp.we_wordv[k][i]; i++,j++) {
+				if( filestart[j]=='\\' ) j++;
+				if( filestart[j]!=exp.we_wordv[k][i] ) {
+					filestart[j]=0;
+					break;
+				}
+			}
+	} else {
+		filestart[ p ] = 0;
+	}
+	wordfree(&exp);
 }
 
 void

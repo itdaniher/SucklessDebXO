@@ -1,0 +1,245 @@
+<!DOCTYPE HTML PUBLIC "-//W3O//DTD W3 HTML 2.0//EN">
+<html>
+<head>
+<meta name=GENERATOR content="faqproc">
+<title>EXTRACT(1)</title>
+</head>
+<body>
+<H1>EXTRACT(1)</H1>
+<!-- This program and its documentation are Public Domain. -->
+<!-- Steve Summit, scs@eskimo.com -->
+<!-- See http://www.eskimo.com/~scs/src/#extract for possible updates. -->
+<H2>NAME</H2>
+
+extract - extract byte ranges from file or stream
+<H2>SYNOPSIS</H2>
+
+<B>extract</B>
+[
+<B>-nv</B>
+]
+ranges
+[ files ]
+<br><B>extract</B>
+[
+<B>-nv</B>
+]
+<B>-f</B>
+frombyte
+<B>-t</B>
+tobyte
+[ files ]
+<H2>DESCRIPTION</H2>
+
+<p><I>extract</I>
+extracts selected ranges of bytes,
+from standard input or named files.
+Byte numbers are 1-based
+(but see the <B>-s</B> option below).
+</p><p>The byte ranges to be extracted may be specified in several ways.
+First (though this is somewhat of a special case),
+a single numeric argument on the command line
+requests that a simple initial prefix of the input,
+<I>n</I> bytes long, be extracted.
+For example,
+<pre>
+	extract 10 inputfile
+</pre>
+would extract the first 10 bytes
+of the file named <I>inputfile</I>.
+</p><p>More generally,
+byte ranges
+may be selected
+using the notation
+<I>m</I>-<I>n</I>.
+Multiple ranges may be separated by commas,
+or entered as separate arguments.
+For example,
+the invocation
+<pre>
+	extract 10-20 inputfile
+</pre>
+would extract bytes 10 through 20 of
+<I>inputfile</I>.
+</p><p>In the
+<I>m</I>-<I>n</I>
+notation,
+either
+<I>m</I>
+or
+<I>n</I>
+(but not both) may be omitted.
+The notation
+<B>-</B><I>n</I>
+means from the beginning of the file up to byte
+<I>n</I>.
+The notation
+<I>m</I><B>-</B>
+means from byte
+<I>m</I>
+to the end of the file.
+</p><p>Because multiple byte numbers may be entered as separate arguments,
+there is an ambiguity
+if an input filename has a name which looks like a number.
+To resolve the ambiguity, use an alternative pathname for the file
+which does not begin with a digit.
+The simplest way to do so is to precede the numeric filename with ``./''.
+</p><H2>OPTIONS</H2>
+
+<dl>
+<dt><B>-v</B>
+</dt><dd>Invert;
+extract all bytes
+<em>not</em>
+selected.
+</dd><dt><B>-version</B>
+</dt><dd>Print program's version number.
+</dd><dt><B>-?</B>,<B>-h</B>
+</dt><dd>Print a brief help message.
+</dd></dl>
+<H2>ALTERNATIVE BYTE NUMBER SELECTION OPTIONS</H2>
+
+<p>It is also possible to specify byte numbers or ranges
+using explicit option flags:
+<dl>
+<dt><B>-f</B> <I>n</I>
+</dt><dd>(``from'')
+Start extracting at byte
+<I>n</I>.
+</dd><dt><B>-s</B> <I>n</I>
+</dt><dd>(``seek'')
+Start extracting at
+<a href="/~scs/cgi-bin/manredir.cgi?name=lseek&sec=2"><I>lseek(2)</I></a> offset <I>n</I>,
+that is, just after byte number <I>n</I>.
+(<B>-s</B> <I>n</I>
+is therefore equivalent to
+<B>-f</B> <I>n</I>+1.)
+</dd><dt><B>-t</B> <I>n</I>
+</dt><dd>(``to'')
+Stop extracting at byte
+<I>n</I>.
+</dd><dt><B>-e</B> <I>n</I>
+</dt><dd>(``end'')
+Stop extracting just before byte
+<I>n</I>,
+that is, at byte
+<I>n</I>-1.
+</dd><dt><B>-p</B> <I>n</I>
+</dt><dd>(``plus'')
+Extract
+<I>n</I>
+bytes past the last-specified start byte.
+That is,
+<pre>
+	-f m -p n
+</pre>
+is equivalent to
+<pre>
+	-f m -t m+n-1
+</pre>
+(or to <TT>-f m -e m+n</TT> ).
+</dd></dl>
+</p><p>Any number of
+<B>-f</B>,
+<B>-s</B>,
+<B>-t</B>,
+<B>-e</B>,
+and
+<B>-p</B>
+options may appear.
+When these options are used,
+lone numbers
+on the command line
+are
+<em>not</em>
+interpreted as byte numbers or ranges,
+and are therefore unambiguously usable as filenames.
+</p><p>The
+<B>-f</B>,
+<B>-s</B>,
+<B>-t</B>,
+<B>-e</B>,
+and
+<B>-p</B>
+options are intended for use in shell scripts,
+when a complicated set of byte number ranges is being built up on-the-fly,
+and when constructing a single string
+containing many dashes and commas
+would be even more cumbersome.
+</p><H2>MORE DESCRIPTION</H2>
+
+<p>When
+<I>extract</I>
+is invoked with multiple input filenames,
+the specified bytes are selected from all files.
+For example,
+<pre>
+	extract 5-10 a b c
+</pre>
+would extract bytes 5 through 10 of file
+<I>a</I>,
+followed by bytes 5 through 10 of file
+<I>b</I>,
+followed by bytes 5 through 10 of file
+<I>c</I>.
+To select bytes from the concatenation of many input files,
+use
+<a href="/~scs/cgi-bin/manredir.cgi?name=cat&sec=1"><I>cat(1)</I></a>
+and a pipeline:
+<pre>
+	cat a b c | extract 5-10
+</pre>
+</p><p>The
+<I>m</I>-<I>n</I>
+byte-selection syntax also supports ``relative'' (counted) range increments,
+analogous to the
+<B>-p</B>
+option.
+The notation
+<I>m</I><B>:</B><I>n</I>
+is equivalent to
+<I>m</I><B>-</B><I>m</I>+<I>n</I>-1.
+For example,
+the invocation
+<pre>
+	extract 5:10 inputfile
+</pre>
+would extract 10 bytes beginning with byte 5
+(that is, bytes 5 through 14)
+</p><p><I>extract</I> can extract individual bytes,
+although this is infrequently useful.
+For example,
+<pre>
+	extract 1,5,10-20
+</pre>
+would extract bytes 1, 5, and 10 through 20.
+There is another ambiguity, however,
+since a single number <I>n</I>
+(as discussed above)
+selects bytes 1-<I>n</I>.
+To select byte <I>n</I> and only byte <I>n</I>,
+use the degenerate range
+<I>n</I><B>-</B><I>n</I>.
+</p><H2>HISTORY</H2>
+
+<p><I>extract</I> is closely related to the
+<a href="line.man.html"><I>line</I></a> program,
+and in fact shares its source code.
+</p><p>This documentation corresponds to version 2.3 of the program.
+</p><p>See
+<a href="http://www.eskimo.com/~scs/src/#extract"><TT>http://www.eskimo.com/~scs/src/#extract</TT></a>
+for possible updates.
+</p><H2>SEE ALSO</H2>
+
+<a href="line.man.html"><I>line</I></a>,
+<a href="/~scs/cgi-bin/manredir.cgi?name=lseek&sec=2"><I>lseek(2)</I></a>
+<H2>AUTHOR</H2>
+
+<p><a href="http://www.eskimo.com/~scs/">Steve Summit</a>,
+<TT>scs@eskimo.com</TT>
+</p><hr>
+<hr>
+<p>
+</p>
+</body>
+</html>

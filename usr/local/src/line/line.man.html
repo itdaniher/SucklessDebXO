@@ -1,0 +1,238 @@
+<!DOCTYPE HTML PUBLIC "-//W3O//DTD W3 HTML 2.0//EN">
+<html>
+<head>
+<meta name=GENERATOR content="faqproc">
+<title>LINE(1)</title>
+</head>
+<body>
+<H1>LINE(1)</H1>
+<!-- This program and its documentation are Public Domain. -->
+<!-- Steve Summit, scs@eskimo.com -->
+<!-- See http://www.eskimo.com/~scs/src/#line for possible updates. -->
+<H2>NAME</H2>
+
+line - extract lines from a file
+<H2>SYNOPSIS</H2>
+
+<B>line</B>
+[
+<B>-nrv</B>
+]
+lines
+[ files ]
+<br><B>line</B>
+[
+<B>-nrv</B>
+]
+<B>-f</B>
+fromline
+<B>-t</B>
+toline
+[ files ]
+<H2>DESCRIPTION</H2>
+
+<p><I>line</I>
+extracts selected lines,
+specified by line number,
+from standard input or named files.
+Line numbers are 1-based.
+</p><p>The line numbers to be extracted may be specified in several ways.
+The most basic is to indicate individual line numbers individually,
+or line number ranges using the notation
+<I>m</I>-<I>n</I>.
+Multiple line numbers or ranges may be separated by commas,
+or entered as separate arguments.
+For example,
+the invocation
+<pre>
+	line 1,5,10-20 inputfile
+</pre>
+would print lines 1, 5, and 10 through 20 of the file named
+<I>inputfile</I>.
+An equivalent invocation would be
+<pre>
+	line 1 5 10-20 inputfile
+</pre>
+</p><p>In the
+<I>m</I>-<I>n</I>
+notation,
+either
+<I>m</I>
+or
+<I>n</I>
+(but not both) may be omitted.
+The notation
+<B>-</B><I>n</I>
+means from the beginning of the file up to line
+<I>n</I>.
+The notation
+<I>m</I><B>-</B>
+means from line
+<I>m</I>
+to the end of the file.
+</p><p>Because multiple line numbers may be entered as separate arguments,
+there is an ambiguity
+if an input filename has a name which looks like a number.
+To resolve the ambiguity, use an alternative pathname for the file
+which does not begin with a digit.
+The simplest way to do so is to precede the numeric filename with ``./''.
+</p><H2>OPTIONS</H2>
+
+<dl>
+<dt><B>-n</B>
+</dt><dd>Number output lines;
+precede printed lines with their line numbers
+(separated by a colon).
+</dd><dt><B>-r</B>
+</dt><dd>Random access.
+By default, all line numbers selected and printed must be
+monotonically increasing.
+With
+<B>-r</B>,
+it is permissible to ``back up'' in the input file
+to print some earlier lines preceding those already printed.
+To support this functionality,
+<I>line</I>
+builds an index of the lseek offsets of the lines it has seen.
+Random-access selection with
+<B>-r</B>
+is therefore possible only when the input is a true file,
+since seeking is impossible on pipes.
+Also, the line number index
+may consume large amounts of memory for large files.
+</dd><dt><B>-v</B>
+</dt><dd>Invert;
+print all lines
+<em>not</em>
+selected.
+</dd><dt><B>-version</B>
+</dt><dd>Print program's version number.
+</dd><dt><B>-?</B>,<B>-h</B>
+</dt><dd>Print a brief help message.
+</dd></dl>
+<H2>ALTERNATIVE LINE NUMBER SELECTION OPTIONS</H2>
+
+<p>It is also possible to specify line numbers or ranges
+using explicit option flags:
+<dl>
+<dt><B>-f</B> <I>n</I>
+</dt><dd>(``from'')
+Start printing at line
+<I>n</I>.
+</dd><dt><B>-t</B> <I>n</I>
+</dt><dd>(``to'')
+Stop printing at line
+<I>n</I>.
+</dd><dt><B>-e</B> <I>n</I>
+</dt><dd>(``end'')
+Stop printing just before line
+<I>n</I>,
+that is, at line
+<I>n</I>-1.
+</dd><dt><B>-p</B> <I>n</I>
+</dt><dd>(``plus'')
+Print
+<I>n</I>
+lines past the last-specified start line.
+That is,
+<pre>
+	-f m -p n
+</pre>
+is equivalent to
+<pre>
+	-f m -t m+n-1
+</pre>
+(or to <TT>-f m -e m+n</TT> ).
+</dd></dl>
+</p><p>Any number of
+<B>-f</B>,
+<B>-t</B>,
+<B>-e</B>,
+and
+<B>-p</B>
+options may appear.
+When these options are used,
+lone numbers
+on the command line
+are
+<em>not</em>
+interpreted as line numbers or ranges,
+and are therefore unambiguously usable as filenames.
+</p><p>The
+<B>-f</B>,
+<B>-t</B>,
+<B>-e</B>,
+and
+<B>-p</B>
+options are intended for use in shell scripts,
+when a complicated set of line number ranges is being built up on-the-fly,
+and when constructing a single string
+containing many dashes and commas
+would be even more cumbersome.
+</p><H2>MORE DESCRIPTION</H2>
+
+<p>When
+<I>line</I>
+is invoked with multiple input filenames,
+the specified lines are selected from all files.
+For example,
+<pre>
+	line 5,10 a b c
+</pre>
+would print lines 5 and 10 of file
+<I>a</I>,
+followed by lines 5 and 10 of file
+<I>b</I>,
+followed by lines 5 and 10 of file
+<I>c</I>.
+To select lines from the concatenation of many input files,
+use
+<a href="/~scs/cgi-bin/manredir.cgi?name=cat&sec=1"><I>cat(1)</I></a>
+and a pipeline:
+<pre>
+	cat a b c | line 5,10
+</pre>
+</p><p>The
+<I>m</I>-<I>n</I>
+line-selection syntax also supports ``relative'' (counted) range increments,
+analogous to the
+<B>-p</B>
+option.
+The notation
+<I>m</I><B>:</B><I>n</I>
+is equivalent to
+<I>m</I><B>-</B><I>m</I>+<I>n</I>-1.
+For example,
+the invocation
+<pre>
+	line 5:10,20 inputfile
+</pre>
+would print 10 lines beginning with line 5
+(that is, lines 5 through 14),
+followed by line 20.
+</p><H2>HISTORY</H2>
+
+<p><I>line</I>
+was inspired by
+a program of the same name and basic functionality
+conceived by Philip Lantz at Tektronix MDP circa 1985.
+</p><p>This documentation corresponds to version 2.3 of the program.
+</p><p>See
+<a href="http://www.eskimo.com/~scs/src/#line"><TT>http://www.eskimo.com/~scs/src/#line</TT></a>
+for possible updates.
+</p><H2>SEE ALSO</H2>
+
+<a href="/~scs/cgi-bin/manredir.cgi?name=head&sec=1"><I>head(1)</I></a>,
+<a href="/~scs/cgi-bin/manredir.cgi?name=tail&sec=1"><I>tail(1)</I></a>,
+<a href="/~scs/cgi-bin/manredir.cgi?name=sed&sec=1"><I>sed(1)</I></a>,
+<a href="column.man.html"><I>column</I></a>
+<H2>AUTHOR</H2>
+
+<p><a href="http://www.eskimo.com/~scs/">Steve Summit</a>,
+<TT>scs@eskimo.com</TT>
+</p><hr>
+<hr>
+<p>
+</p>
+</body>
+</html>

@@ -1,0 +1,15 @@
+Line extractor for text files.
+See line.1 and/or line.man.html for documentation.
+See http://www.eskimo.com/~scs/src/#line for possible updates.
+
+To build, just invoke `make'.  There are no configuration options,
+and there is no config script.  (The source code should be widely
+portable, i.e. to any ANSI C environment, as-is.)
+
+These source files can build a second, related program, called
+`extract', which extracts numbered bytes and byte ranges from
+binary files, analogously to the way `line' extracts numbered
+lines from test files.  See extract.1 and/or extract.man.html
+for documentation; "make extract" to build.
+
+These programs and their source files are in the Public Domain.
