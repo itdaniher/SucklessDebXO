@@ -6,12 +6,9 @@
  * events about window (dis-)appearance.  Only one X connection at a time is
  * allowed to select for this event mask.
  *
- * Calls to fetch an X event from the event queue are blocking.  Due reading
- * status text from standard input, a select()-driven main loop has been
- * implemented which selects for reads on the X connection and STDIN_FILENO to
- * handle all data smoothly. The event handlers of dwm are organized in an
- * array which is accessed whenever a new event has been fetched. This allows
- * event dispatching in O(1) time.
+ * The event handlers of dwm are organized in an array which is accessed
+ * whenever a new event has been fetched. This allows event dispatching
+ * in O(1) time.
  *
  * Each child of the root window is called a client, except windows which have
  * set the override_redirect flag.  Clients are organized in a global
@@ -26,11 +23,11 @@
 #include <errno.h>
 #include <locale.h>
 #include <stdarg.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/select.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <X11/cursorfont.h>
@@ -131,6 +128,7 @@ typedef struct {
 } Rule;
 
 /* function declarations */
+static void adjustborder(Client *c, unsigned int bw);
 static void applyrules(Client *c);
 static void arrange(void);
 static void attach(Client *c);
@@ -181,7 +179,8 @@ static void setclientstate(Client *c, long state);
 static void setlayout(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
-static void showhide(Client *c);
+static void showhide(Client *c, unsigned int ntiled);
+static void sigchld(int signal);
 static void spawn(const Arg *arg);
 static void tag(const Arg *arg);
 static int textnw(const char *text, unsigned int len);
@@ -196,6 +195,7 @@ static void updatebar(void);
 static void updategeom(void);
 static void updatenumlockmask(void);
 static void updatesizehints(Client *c);
+static void updatestatus(void);
 static void updatetitle(Client *c);
 static void updatewmhints(Client *c);
 static void view(const Arg *arg);
@@ -246,6 +246,16 @@ struct NumTags { char limitexceeded[sizeof(unsigned int) * 8 < LENGTH(tags) ? -1
 
 /* function implementations */
 void
+adjustborder(Client *c, unsigned int bw) {
+	XWindowChanges wc;
+
+	if(c->bw != bw) {
+		c->bw = wc.border_width = bw;
+		XConfigureWindow(dpy, c->win, CWBorderWidth, &wc);
+	}
+}
+
+void
 applyrules(Client *c) {
 	unsigned int i;
 	Rule *r;
@@ -259,7 +269,7 @@ applyrules(Client *c) {
 			&& (!r->class || (ch.res_class && strstr(ch.res_class, r->class)))
 			&& (!r->instance || (ch.res_name && strstr(ch.res_name, r->instance)))) {
 				c->isfloating = r->isfloating;
-				c->tags |= r->tags & TAGMASK;
+				c->tags |= r->tags & TAGMASK ? r->tags & TAGMASK : tagset[seltags]; 
 			}
 		}
 		if(ch.res_class)
@@ -273,7 +283,11 @@ applyrules(Client *c) {
 
 void
 arrange(void) {
-	showhide(stack);
+	unsigned int nt;
+	Client *c;
+
+	for(nt = 0, c = nexttiled(clients); c; c = nexttiled(c->next), nt++);
+	showhide(stack, nt);
 	focus(NULL);
 	if(lt[sellt]->arrange)
 		lt[sellt]->arrange();
@@ -344,7 +358,6 @@ cleanup(void) {
 	Arg a = {.ui = ~0};
 	Layout foo = { "", NULL };
 
-	close(STDIN_FILENO);
 	view(&a);
 	lt[sellt] = &foo;
 	while(stack)
@@ -926,10 +939,14 @@ maprequest(XEvent *e) {
 
 void
 monocle(void) {
+	unsigned int n;
 	Client *c;
 
-	for(c = nexttiled(clients); c; c = nexttiled(c->next))
+	for(n = 0, c = nexttiled(clients); c && n < 2; c = nexttiled(c->next), n++);
+	for(c = nexttiled(clients); c; c = nexttiled(c->next)) {
+		adjustborder(c, n == 1 ? 0 : borderpx);
 		resize(c, wx, wy, ww - 2 * c->bw, wh - 2 * c->bw, resizehints);
+	}
 }
 
 void
@@ -998,9 +1015,11 @@ propertynotify(XEvent *e) {
 	Window trans;
 	XPropertyEvent *ev = &e->xproperty;
 
-	if(ev->state == PropertyDelete)
+	if((ev->window == root) && (ev->atom = XA_WM_NAME))
+		updatestatus();
+	else if(ev->state == PropertyDelete)
 		return; /* ignore */
-	if((c = getclient(ev->window))) {
+	else if((c = getclient(ev->window))) {
 		switch (ev->atom) {
 		default: break;
 		case XA_WM_TRANSIENT_FOR:
@@ -1026,7 +1045,7 @@ propertynotify(XEvent *e) {
 
 void
 quit(const Arg *arg) {
-	readin = running = False;
+	running = False;
 }
 
 void
@@ -1132,8 +1151,8 @@ resizemouse(const Arg *arg) {
 			handler[ev.type](&ev);
 			break;
 		case MotionNotify:
-			nw = MAX(ev.xmotion.x - ocx - 2*c->bw + 1, 1);
-			nh = MAX(ev.xmotion.y - ocy - 2*c->bw + 1, 1);
+			nw = MAX(ev.xmotion.x - ocx - 2 * c->bw + 1, 1);
+			nh = MAX(ev.xmotion.y - ocy - 2 * c->bw + 1, 1);
 
 			if(snap && nw >= wx && nw <= wx + ww
 			        && nh >= wy && nh <= wy + wh) {
@@ -1180,60 +1199,13 @@ restack(void) {
 
 void
 run(void) {
-	char *p;
-	char sbuf[sizeof stext];
-	fd_set rd;
-	int r, xfd;
-	unsigned int len, offset;
 	XEvent ev;
 
-	/* main event loop, also reads status text from stdin */
+	/* main event loop */
 	XSync(dpy, False);
-	xfd = ConnectionNumber(dpy);
-	offset = 0;
-	len = sizeof stext - 1;
-	sbuf[len] = stext[len] = '\0'; /* 0-terminator is never touched */
-	while(running) {
-		FD_ZERO(&rd);
-		if(readin)
-			FD_SET(STDIN_FILENO, &rd);
-		FD_SET(xfd, &rd);
-		if(select(xfd + 1, &rd, NULL, NULL, NULL) == -1) {
-			if(errno == EINTR)
-				continue;
-			die("select failed\n");
-		}
-		if(FD_ISSET(STDIN_FILENO, &rd)) {
-			switch((r = read(STDIN_FILENO, sbuf + offset, len - offset))) {
-			case -1:
-				strncpy(stext, strerror(errno), len);
-				readin = False;
-				break;
-			case 0:
-				strncpy(stext, "EOF", 4);
-				readin = False;
-				break;
-			default:
-				for(p = sbuf + offset; r > 0; p++, r--, offset++)
-					if(*p == '\n' || *p == '\0') {
-						*p = '\0';
-						strncpy(stext, sbuf, len);
-						p += r - 1; /* p is sbuf + offset + r - 1 */
-						for(r = 0; *(p - r) && *(p - r) != '\n'; r++);
-						offset = r;
-						if(r)
-							memmove(sbuf, p - r + 1, r);
-						break;
-					}
-				break;
-			}
-			drawbar();
-		}
-		while(XPending(dpy)) {
-			XNextEvent(dpy, &ev);
-			if(handler[ev.type])
-				(handler[ev.type])(&ev); /* call handler */
-		}
+	while(running && !XNextEvent(dpy, &ev)) {
+		if(handler[ev.type])
+			(handler[ev.type])(&ev); /* call handler */
 	}
 }
 
@@ -1356,8 +1328,7 @@ setup(void) {
 			CWOverrideRedirect|CWBackPixmap|CWEventMask, &wa);
 	XDefineCursor(dpy, barwin, cursor[CurNormal]);
 	XMapRaised(dpy, barwin);
-	strcpy(stext, "dwm-"VERSION);
-	drawbar();
+	updatestatus();
 
 	/* EWMH support per view */
 	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
@@ -1365,7 +1336,8 @@ setup(void) {
 
 	/* select for events */
 	wa.event_mask = SubstructureRedirectMask|SubstructureNotifyMask|ButtonPressMask
-			|EnterWindowMask|LeaveWindowMask|StructureNotifyMask;
+			|EnterWindowMask|LeaveWindowMask|StructureNotifyMask
+			|PropertyChangeMask;
 	XChangeWindowAttributes(dpy, root, CWEventMask|CWCursor, &wa);
 	XSelectInput(dpy, root, wa.event_mask);
 
@@ -1373,37 +1345,41 @@ setup(void) {
 }
 
 void
-showhide(Client *c) {
+showhide(Client *c, unsigned int ntiled) {
 	if(!c)
 		return;
 	if(ISVISIBLE(c)) { /* show clients top down */
+		if(c->isfloating || ntiled > 1) /* avoid unnecessary border reverts */
+			adjustborder(c, borderpx);
 		XMoveWindow(dpy, c->win, c->x, c->y);
 		if(!lt[sellt]->arrange || c->isfloating)
 			resize(c, c->x, c->y, c->w, c->h, True);
-		showhide(c->snext);
+		showhide(c->snext, ntiled);
 	}
 	else { /* hide clients bottom up */
-		showhide(c->snext);
+		showhide(c->snext, ntiled);
 		XMoveWindow(dpy, c->win, c->x + 2 * sw, c->y);
 	}
 }
 
+
+void
+sigchld(int signal) {
+	while(0 < waitpid(-1, NULL, WNOHANG));
+}
+
 void
 spawn(const Arg *arg) {
-	/* The double-fork construct avoids zombie processes and keeps the code
-	 * clean from stupid signal handlers. */
+	signal(SIGCHLD, sigchld);
 	if(fork() == 0) {
-		if(fork() == 0) {
-			if(dpy)
-				close(ConnectionNumber(dpy));
-			setsid();
-			execvp(((char **)arg->v)[0], (char **)arg->v);
-			fprintf(stderr, "dwm: execvp %s", ((char **)arg->v)[0]);
-			perror(" failed");
-		}
+		if(dpy)
+			close(ConnectionNumber(dpy));
+		setsid();
+		execvp(((char **)arg->v)[0], (char **)arg->v);
+		fprintf(stderr, "dwm: execvp %s", ((char **)arg->v)[0]);
+		perror(" failed");
 		exit(0);
 	}
-	wait(0);
 }
 
 void
@@ -1438,6 +1414,7 @@ tile(void) {
 	/* master */
 	c = nexttiled(clients);
 	mw = mfact * ww;
+	adjustborder(c, n == 1 ? 0 : borderpx);
 	resize(c, wx, wy, (n == 1 ? ww : mw) - 2 * c->bw, wh - 2 * c->bw, resizehints);
 
 	if(--n == 0)
@@ -1452,6 +1429,7 @@ tile(void) {
 		h = wh;
 
 	for(i = 0, c = nexttiled(c->next); c; c = nexttiled(c->next), i++) {
+		adjustborder(c, borderpx);
 		resize(c, x, y, w - 2 * c->bw, /* remainder */ ((i + 1 == n)
 		       ? wy + wh - y - 2 * c->bw : h - 2 * c->bw), resizehints);
 		if(h != wh)
@@ -1647,11 +1625,18 @@ updatetitle(Client *c) {
 }
 
 void
+updatestatus() {
+	if(!gettextprop(root, XA_WM_NAME, stext, sizeof(stext)))
+		strcpy(stext, "dwm-"VERSION);
+	drawbar();
+}
+
+void
 updatewmhints(Client *c) {
 	XWMHints *wmh;
 
 	if((wmh = XGetWMHints(dpy, c->win))) {
-		if(ISVISIBLE(c) && wmh->flags & XUrgencyHint) {
+		if(c == sel && wmh->flags & XUrgencyHint) {
 			wmh->flags &= ~XUrgencyHint;
 			XSetWMHints(dpy, c->win, wmh);
 		}
@@ -1723,7 +1708,7 @@ zoom(const Arg *arg) {
 int
 main(int argc, char *argv[]) {
 	if(argc == 2 && !strcmp("-v", argv[1]))
-		die("dwm-"VERSION", © 2006-2008 dwm engineers, see LICENSE for details\n");
+		die("dwm-"VERSION", © 2006-2009 dwm engineers, see LICENSE for details\n");
 	else if(argc != 1)
 		die("usage: dwm [-v]\n");
 
