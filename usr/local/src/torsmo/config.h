@@ -65,7 +65,7 @@
 #define HAVE_LIBXEXT 1
 
 /* Define if you are using Xft */
-#define XFT 1
+#define XFT 0 
 
 /* Define if you have sysinfo (Linux) */
 #define HAVE_SYSINFO 1

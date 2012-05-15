@@ -170,12 +170,6 @@ void update_stuff() {
 
   if (NEED(INFO_NET)) update_net_stats();
 
-  if (NEED(INFO_MAIL)) update_mail_count();
-
-#ifdef SETI
-  if (NEED(INFO_SETI)) update_seti();
-#endif
-
   if (NEED(INFO_LOADAVG)) update_load_average();
 
   if ((NEED(INFO_MEM) || NEED(INFO_BUFFERS)) &&

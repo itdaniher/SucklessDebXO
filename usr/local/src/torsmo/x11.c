@@ -2,16 +2,9 @@
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
-#ifdef XFT
-#include <X11/Xft/Xft.h>
-#endif
 
 #ifdef XDBE
 int use_xdbe;
-#endif
-
-#ifdef XFT
-int use_xft;
 #endif
 
 /* some basic X11 stuff */

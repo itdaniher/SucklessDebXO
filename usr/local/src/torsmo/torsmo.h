@@ -74,8 +74,6 @@ struct information {
 
   float loadavg[3];
 
-  int new_mail_count, mail_count;
-
   float seti_prog;
   float seti_credit;
 };
@@ -85,10 +83,6 @@ struct information {
 #include <X11/Xlib.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
-
-#ifdef XFT
-#include <X11/Xft/Xft.h>
-#endif
 
 #if defined(HAVE_X11_EXTENSIONS_XDBE_H) && defined(HAVE_LIBXEXT) && defined(DOUBLE_BUFFER)
 # define XDBE
@@ -104,9 +98,6 @@ struct torsmo_window {
 #ifdef XDBE
   XdbeBackBuffer back_buffer;
 #endif
-#ifdef XFT
-  XftDraw *xftdraw;
-#endif
 
   int width;
   int height;
@@ -120,9 +111,6 @@ struct torsmo_window {
 extern int use_xdbe;
 #endif
 
-#ifdef XFT
-extern int use_xft;
-#endif
 
 extern Display *display;
 extern int display_width;
@@ -184,37 +172,11 @@ char* get_acpi_ac_adapter(void);
 char* get_acpi_fan(void);
 void get_battery_stuff(char *buf, unsigned int n, const char *bat);
 
-#ifdef NVCTRL
-/* in nvctrl.c */
-unsigned int init_nvctrl(const char *feat);
-int get_nvctrl_info(unsigned int arg);
-#endif
-
 /* fs-stuff is possibly system dependant (in fs.c) */
 
 void update_fs_stats(void);
 struct fs_stat *prepare_fs_stat(const char *path);
 void clear_fs_stats(void);
 
-/* in mixer.c */
-
-int mixer_init(const char *);
-int mixer_get_avg(int);
-int mixer_get_left(int);
-int mixer_get_right(int);
-
-/* in mail.c */
-
-extern char *current_mail_spool;
-
-void update_mail_count();
-
-/* in seti.c */
-
-#ifdef SETI
-extern char *seti_dir;
-
-void update_seti();
 #endif
 
-#endif

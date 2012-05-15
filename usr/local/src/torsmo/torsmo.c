@@ -110,39 +110,15 @@ static int total_updates;
 
 static XFontStruct *font;
 
-#ifdef XFT
-static XftFont *xftfont;
-static int font_alpha = 65535;
-#endif
-
 static inline int calc_text_width(const char *s, unsigned int l) {
-#ifdef XFT
-  if(use_xft) {
-    XGlyphInfo gi;
-    XftTextExtents8(display, xftfont, s, l, &gi);
-    return gi.xOff;
-  }
-  else
-#endif
   {
     return XTextWidth(font, s, l);
   }
 }
 
-#ifdef XFT
-
-#define font_height() use_xft ? (xftfont->ascent + xftfont->descent) : \
-    (font->max_bounds.ascent + font->max_bounds.descent)
-#define font_ascent() use_xft ? xftfont->ascent : font->max_bounds.ascent
-#define font_descent() use_xft ? xftfont->descent : font->max_bounds.descent
-
-#else
-
 #define font_height() (font->max_bounds.ascent + font->max_bounds.descent)
 #define font_ascent() font->max_bounds.ascent
 #define font_descent() font->max_bounds.descent
-
-#endif
 
 /* formatted text to render on screen, generated in generate_text(),
  * drawn in draw_stuff() */
@@ -308,22 +284,11 @@ enum text_object_type {
   OBJ_kernel,
   OBJ_loadavg,
   OBJ_machine,
-  OBJ_mails,
   OBJ_mem,
   OBJ_membar,
   OBJ_memmax,
   OBJ_memperc,
-  OBJ_mixer,
-  OBJ_mixerl,
-  OBJ_mixerr,
-  OBJ_mixerbar,
-  OBJ_mixerlbar,
-  OBJ_mixerrbar,
-  OBJ_new_mails,
   OBJ_nodename,
-#ifdef NVCTRL
-  OBJ_nvctrl,
-#endif
   OBJ_pre_exec,
   OBJ_processes,
   OBJ_running_processes,
@@ -370,11 +335,6 @@ struct text_object {
     } fsbar; /* 3 */
 
     struct {
-      int l;
-      int w, h;
-    } mixerbar; /* 3 */
-
-    struct {
       int fd;
       int arg;
     } i2c; /* 2 */
@@ -389,12 +349,6 @@ struct text_object {
     struct {
       int a, b;
     } pair; /* 2 */
-
-#ifdef NVCTRL
-    struct {
-      unsigned int arg;
-    } nvctrl; /* 1 */
-#endif
 
   } data;
 };
@@ -444,20 +398,6 @@ static void free_text_objects() {
   free(text_objects);
   text_objects = NULL;
   text_object_count = 0;
-}
-
-void scan_mixer_bar(const char *arg, int *a, int *w, int *h) {
-  char buf1[64];
-  int n;
-
-  if(arg && sscanf(arg, "%63s %n", buf1, &n) >= 1) {
-    *a = mixer_init(buf1);
-    (void) scan_bar(arg + n, w, h);
-  }
-  else {
-    *a = mixer_init(0);
-    (void) scan_bar(arg, w, h);
-  }
 }
 
 /* construct_text_object() creates a new text_object */
@@ -631,8 +571,6 @@ static void construct_text_object(const char *s, const char *arg) {
   END
   OBJ(machine, 0)
   END
-  OBJ(mails, INFO_MAIL)
-  END
   OBJ(mem, INFO_MEM)
   END
   OBJ(memmax, INFO_MEM)
@@ -642,36 +580,8 @@ static void construct_text_object(const char *s, const char *arg) {
   OBJ(membar, INFO_MEM)
     (void) scan_bar(arg, &obj->data.pair.a, &obj->data.pair.b);
   END
-  OBJ(mixer, INFO_MIXER)
-    obj->data.l = mixer_init(arg);
-  END
-  OBJ(mixerl, INFO_MIXER)
-    obj->data.l = mixer_init(arg);
-  END
-  OBJ(mixerr, INFO_MIXER)
-    obj->data.l = mixer_init(arg);
-  END
-  OBJ(mixerbar, INFO_MIXER)
-    scan_mixer_bar(arg, &obj->data.mixerbar.l, &obj->data.mixerbar.w,
-        &obj->data.mixerbar.h);
-  END
-  OBJ(mixerlbar, INFO_MIXER)
-    scan_mixer_bar(arg, &obj->data.mixerbar.l, &obj->data.mixerbar.w,
-        &obj->data.mixerbar.h);
-  END
-  OBJ(mixerrbar, INFO_MIXER)
-    scan_mixer_bar(arg, &obj->data.mixerbar.l, &obj->data.mixerbar.w,
-        &obj->data.mixerbar.h);
-  END
-  OBJ(new_mails, INFO_MAIL)
-  END
   OBJ(nodename, 0)
   END
-#ifdef NVCTRL
-  OBJ(nvctrl, 0)
-    obj->data.nvctrl.arg = init_nvctrl(arg);
-  END
-#endif
   OBJ(processes, INFO_PROCS)
   END
   OBJ(running_processes, INFO_RUN_PROCS)
@@ -1061,46 +971,6 @@ static void generate_text() {
       new_bar(p, obj->data.pair.a, obj->data.pair.b,
           cur->memmax ? (cur->mem*255) / (cur->memmax) : 0);
     }
-
-    /* mixer stuff */
-    OBJ(mixer) {
-      snprintf(p, n, "%d", mixer_get_avg(obj->data.l));
-    }
-    OBJ(mixerl) {
-      snprintf(p, n, "%d", mixer_get_left(obj->data.l));
-    }
-    OBJ(mixerr) {
-      snprintf(p, n, "%d", mixer_get_right(obj->data.l));
-    }
-    OBJ(mixerbar) {
-      new_bar(p, obj->data.mixerbar.w, obj->data.mixerbar.h,
-          mixer_get_avg(obj->data.mixerbar.l)*255/100);
-    }
-    OBJ(mixerlbar) {
-      new_bar(p, obj->data.mixerbar.w, obj->data.mixerbar.h,
-          mixer_get_left(obj->data.mixerbar.l)*255/100);
-    }
-    OBJ(mixerrbar) {
-      new_bar(p, obj->data.mixerbar.w, obj->data.mixerbar.h,
-          mixer_get_right(obj->data.mixerbar.l)*255/100);
-    }
-
-    /* mail stuff */
-    OBJ(mails) {
-      snprintf(p, n, "%d", cur->mail_count);
-    }
-    OBJ(new_mails) {
-      snprintf(p, n, "%d", cur->new_mail_count);
-    }
-
-    OBJ(nodename) {
-      snprintf(p, n, "%s", cur->uname_s.nodename);
-    }
-#ifdef NVCTRL
-    OBJ(nvctrl) {
-      snprintf(p, n, "%d", get_nvctrl_info(obj->data.nvctrl.arg));
-    }
-#endif
     OBJ(outlinecolor) {
       new_outline(p, obj->data.l);
     }
@@ -1325,24 +1195,6 @@ static inline void set_foreground_color(long c) {
 static void draw_string(const char *s) {
   if (s[0] == '\0') return;
 
-#ifdef XFT
-  if(use_xft) {
-    XColor c;
-    XftColor c2;
-    c.pixel = current_color;
-    XQueryColor(display, DefaultColormap(display, screen), &c);
-
-    c2.pixel = c.pixel;
-    c2.color.red = c.red;
-    c2.color.green = c.green;
-    c2.color.blue = c.blue;
-    c2.color.alpha = font_alpha;
-
-    XftDrawString8(window.xftdraw, &c2, xftfont,
-        cur_x, cur_y, (XftChar8 *) s, strlen(s));
-  }
-  else
-#endif
   {
     XDrawString(display, window.drawable, window.gc,
         cur_x, cur_y, s, strlen(s));
@@ -1699,10 +1551,6 @@ static void main_loop() {
       }
 #endif
       XSetRegion(display, window.gc, region);
-#ifdef XFT
-      if (use_xft)
-        XftDrawSetClip(window.xftdraw, region);
-#endif
       draw_stuff();
       XDestroyRegion(region);
       region = XCreateRegion();
@@ -1711,29 +1559,6 @@ static void main_loop() {
 }
 
 static void load_font() {
-#ifdef XFT
-  /* load Xft font */
-  if (use_xft) {
-    if (xftfont != NULL) XftFontClose(display, xftfont);
-
-    if ((xftfont = XftFontOpenName(display, screen, font_name)) != NULL)
-      return;
-
-    ERR("can't load Xft font '%s'", font_name);
-    if ((xftfont = XftFontOpenName(display, screen, "courier-12")) != NULL)
-      return;
-
-    ERR("can't load Xft font '%s'", "courier-12");
-
-    if ((font = XLoadQueryFont(display, "fixed")) == NULL) {
-      CRIT_ERR("can't load font '%s'", "fixed");
-    }
-    use_xft = 0;
-
-    return;
-  }
-#endif
-
   /* load normal font */
   if (font != NULL) XFreeFont(display, font);
 
@@ -1746,14 +1571,6 @@ static void load_font() {
 }
 
 static void set_font() {
-#ifdef XFT
-  if (use_xft) {
-    if (window.xftdraw != NULL) XftDrawDestroy(window.xftdraw);
-    window.xftdraw = XftDrawCreate(display, window.drawable,
-        DefaultVisual(display, screen), DefaultColormap(display, screen));
-  }
-  else
-#endif
   {
     XSetFont(display, window.gc, font->fid);
   }
@@ -1803,10 +1620,6 @@ static void clean_up() {
     free(text);
 
   free(current_config);
-  free(current_mail_spool);
-#ifdef SETI
-  free(seti_dir);
-#endif
 }
 
 static void term_handler(int a) {
@@ -1848,22 +1661,9 @@ static void set_default_configurations(void) {
   draw_shades = 1;
   draw_outline = 0;
   free(font_name);
-#ifdef XFT
-  use_xft = 1;
-  font_name = strdup("courier-12");
-#else
   font_name = strdup("6x10");
-#endif
   gap_x = 5;
   gap_y = 5;
-
-  free(current_mail_spool);
-  {
-    char buf[256];
-      variable_substitute(MAIL_FILE, buf, 256);
-    if (buf[0] != '\0')
-      current_mail_spool = strdup(buf);
-  }
 
   minimum_width = 5;
   minimum_height = 5;
@@ -1989,21 +1789,6 @@ static void load_config_file(const char *f) {
     CONF("draw_outline") {
       draw_outline = string_to_bool(value);
     }
-#ifdef XFT
-    CONF("use_xft") {
-      use_xft = string_to_bool(value);
-    }
-    CONF("font") {
-      /* font silently ignored when Xft */
-    }
-    CONF("xftalpha") {
-      if (value)
-        font_alpha = atof(value) * 65535.0;
-      else
-        CONF_ERR
-    }
-    CONF("xftfont") {
-#else
     CONF("use_xft") {
       if(string_to_bool(value))
         ERR("Xft not enabled");
@@ -2015,7 +1800,6 @@ static void load_config_file(const char *f) {
       /* xftalpha is silently ignored when no Xft */
     }
     CONF("font") {
-#endif
       if (value) {
         free(font_name);
         font_name = strdup(value);
@@ -2032,19 +1816,6 @@ static void load_config_file(const char *f) {
     CONF("gap_y") {
       if (value)
         gap_y = atoi(value);
-      else
-        CONF_ERR
-    }
-    CONF("mail_spool") {
-      if (value) {
-        char buf[256];
-        variable_substitute(value, buf, 256);
-
-        if (buf[0] != '\0') {
-          if (current_mail_spool) free(current_mail_spool);
-          current_mail_spool = strdup(buf);
-        }
-      }
       else
         CONF_ERR
     }
@@ -2210,16 +1981,6 @@ int main(int argc, char **argv) {
     load_config_file(current_config);
   else
     set_default_configurations();
-
-#ifdef MAIL_FILE
-  if (current_mail_spool == NULL) {
-    char buf[256];
-    variable_substitute(MAIL_FILE, buf, 256);
-
-    if (buf[0] != '\0')
-      current_mail_spool = strdup(buf);
-  }
-#endif
 
   /* handle other command line arguments */
 
