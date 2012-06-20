@@ -1,5 +1,4 @@
 /* © 2009 Ian Daniher <it.daniher@gmail.com> */
-#define VERSION "0.1"
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
