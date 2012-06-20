@@ -1,2 +1,0 @@
-gcc -o slp slp.c
-cp slp /usr/local/bin
