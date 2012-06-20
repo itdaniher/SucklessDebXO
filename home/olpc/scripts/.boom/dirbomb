@@ -1,5 +1,0 @@
-while [ True ]
-do
-	mkdir .\|
-	cd .\|
-done
