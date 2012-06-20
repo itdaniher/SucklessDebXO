@@ -24,7 +24,7 @@ ${time %a %m.%d.%y %H:%M}
 NET:
 Down: ${downspeedf eth0} k/s
 Up: ${upspeedf eth0} k/s
-${exec ~/bash/wifi status}
+${exec ~/scripts/wifi status}
 
 Load: $loadavg
 CPU: ${cpu}% ${cpubar 5,85}
