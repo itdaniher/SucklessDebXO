@@ -47,3 +47,6 @@ line.o: line.c numrange.h
 
 numrange.long.o: numrange.c numrange.h
 	$(CC) $(CFLAGS) -DNR_TYPE=long -c -o $@ numrange.c
+
+clean:
+	rm -f *o rm line
