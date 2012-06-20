@@ -4,3 +4,6 @@
 [submodule "home/olpc/scripts/WIFI"]
 	path = home/olpc/scripts/WIFI
 	url = git@github.com:itdaniher/dmenu-wifi.git
+[submodule "usr/local/src/darkhttpd"]
+	path = usr/local/src/darkhttpd
+	url = git@github.com:itdaniher/darkhttpd.git
